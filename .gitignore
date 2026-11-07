@@ -1,0 +1,38 @@
+# 环境变量（含备份文件，避免 API Key 泄露）
+.env
+.env.*
+!.env.example
+
+# 二进制
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Go
+# 不忽略 go.mod 和 go.sum
+
+# 上传文件
+uploads/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 构建产物
+/bin/
+/tmp/
+/logs/
+
+# 前端依赖
+web/node_modules/
+
+# web/dist/ 故意不忽略：go:embed 需要它，
+# 提交后 clone 下来直接 go build 就能跑，不用先 npm install

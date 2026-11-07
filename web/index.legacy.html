@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>InterviewAce · AI 模拟面试</title>
+<style>
+  :root {
+    --bg: #f6f8fa;
+    --card: #ffffff;
+    --border: #d8dee4;
+    --border-soft: #eaeef2;
+    --text: #1f2328;
+    --muted: #57606a;
+    --faint: #8b949e;
+    --primary: #2f6feb;
+    --primary-hover: #1f5ad4;
+    --ok-bg: #ddf4e4;   --ok-fg: #1a7f37;
+    --warn-bg: #fff8c5; --warn-fg: #9a6700;
+    --info-bg: #ddf4ff; --info-fg: #0969da;
+    --danger-bg: #ffebe9; --danger-fg: #cf222e;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 14px;
+  }
+
+  .topbar {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    height: 52px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 20px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .brand { font-size: 14px; font-weight: 600; letter-spacing: -.01em; }
+  .brand span { color: var(--primary); }
+  .topbar .spacer { flex: 1; }
+  .who { font-size: 12px; color: var(--muted); }
+
+  main { max-width: 880px; margin: 0 auto; padding: 24px 20px 80px; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+  }
+  .card > h2 {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card > .sub { font-size: 12px; color: var(--muted); margin: 0 0 14px; }
+
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; }
+  input[type=text], input[type=email], input[type=password], textarea, select {
+    width: 100%;
+    padding: 7px 11px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    font-size: 13px;
+    font-family: inherit;
+    background: #fff;
+    color: var(--text);
+  }
+  input[type=file] { font-size: 13px; }
+  textarea { resize: vertical; min-height: 84px; line-height: 1.6; }
+  input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(47,111,235,.15);
+  }
+
+  button {
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: #f6f8fa;
+    color: var(--text);
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background .12s;
+  }
+  button:hover { background: #eaeef2; }
+  button.primary {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+    font-weight: 500;
+  }
+  button.primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+  button:disabled { opacity: .55; cursor: not-allowed; }
+  button.link {
+    background: none; border: none; color: var(--primary);
+    padding: 0; font-size: 12px;
+  }
+  button.link:hover { text-decoration: underline; background: none; }
+
+  .row { display: flex; gap: 10px; align-items: flex-end; }
+  .row > .grow { flex: 1; min-width: 0; }
+  .row > button { flex: 0 0 auto; }
+
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    padding: 1px 8px;
+    border-radius: 20px;
+    background: var(--border-soft);
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .badge.ok { background: var(--ok-bg); color: var(--ok-fg); }
+  .badge.warn { background: var(--warn-bg); color: var(--warn-fg); }
+  .badge.info { background: var(--info-bg); color: var(--info-fg); }
+  .badge.danger { background: var(--danger-bg); color: var(--danger-fg); }
+
+  .hint { font-size: 12px; color: var(--muted); }
+  .err { font-size: 12px; color: var(--danger-fg); margin-top: 10px; }
+  .ok-msg { font-size: 12px; color: var(--ok-fg); margin-top: 10px; }
+  .hidden { display: none !important; }
+  .empty { text-align: center; color: var(--faint); padding: 28px 0; font-size: 13px; }
+
+  .qcard {
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--primary);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    background: #fff;
+  }
+  .qcard .qhead { display: flex; gap: 6px; margin-bottom: 8px; }
+  .qcard p { margin: 0; font-size: 14px; line-height: 1.7; white-space: pre-wrap; }
+  .acard {
+    border: 1px solid var(--border-soft);
+    border-left: 3px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 18px;
+    background: #fafbfc;
+  }
+  .acard .alabel { font-size: 11px; color: var(--faint); margin-bottom: 5px; }
+  .acard p { margin: 0; font-size: 13px; line-height: 1.7; color: var(--muted); white-space: pre-wrap; }
+
+  .progress { height: 4px; background: var(--border-soft); border-radius: 2px; overflow: hidden; margin: 10px 0 16px; }
+  .progress > i { display: block; height: 100%; background: var(--primary); transition: width .3s; }
+
+  .item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .item:last-child { border-bottom: none; padding-bottom: 0; }
+  .item .meta { flex: 1; min-width: 0; }
+  .item .title { font-size: 13px; display: flex; align-items: center; gap: 8px; }
+  .item .sub2 { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  .hero {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--border-soft);
+    margin-bottom: 18px;
+  }
+  .hero .num { font-size: 46px; font-weight: 600; line-height: 1; letter-spacing: -.02em; }
+  .hero .num small { font-size: 16px; font-weight: 400; color: var(--faint); }
+  .hero .desc { flex: 1; }
+
+  .dim { margin-bottom: 16px; }
+  .dim:last-child { margin-bottom: 0; }
+  .dim .dtop { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
+  .dim .dname { font-size: 13px; font-weight: 500; }
+  .dim .dval { font-size: 12px; color: var(--muted); }
+  .bar { height: 6px; background: var(--border-soft); border-radius: 3px; overflow: hidden; }
+  .bar > i { display: block; height: 100%; background: var(--primary); border-radius: 3px; }
+  .dim .dcomment { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.6; }
+
+  .cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  @media (max-width: 720px) { .cols { grid-template-columns: 1fr; } }
+  .col { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
+  .col h3 { font-size: 12px; font-weight: 600; margin: 0 0 8px; }
+  .col ul { margin: 0; padding-left: 16px; }
+  .col li { font-size: 12px; line-height: 1.65; color: var(--muted); margin-bottom: 6px; }
+  .col li:last-child { margin-bottom: 0; }
+
+  .trend-wrap { margin-top: 6px; }
+  .trend-svg { display: block; width: 100%; height: 120px; }
+  .trend-legend { display: flex; gap: 16px; margin-top: 8px; font-size: 12px; color: var(--muted); }
+  .trend-legend i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 5px; }
+  .kbd {
+    display: inline-block; font-size: 11px; padding: 0 5px;
+    border: 1px solid var(--border); border-bottom-width: 2px;
+    border-radius: 4px; background: #fafbfc; color: var(--muted);
+    font-family: var(--font-mono, monospace); line-height: 16px;
+  }
+  .samples {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--muted);
+  }
+  .auth-wrap { max-width: 380px; margin: 8vh auto 0; }
+  .auth-wrap .card { padding: 24px; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="brand">Interview<span>Ace</span></span>
+  <span class="spacer"></span>
+  <span class="who" id="who"></span>
+  <button class="link hidden" id="btnLogout" style="margin-left:8px">退出</button>
+</div>
+
+<main>
+
+  <section id="view-auth" class="auth-wrap">
+    <div class="card">
+      <h2 id="authTitle">登录</h2>
+      <p class="sub">上传简历，让 AI 按目标岗位面试你</p>
+      <div class="field">
+        <label>邮箱</label>
+        <input id="email" type="email" placeholder="you@example.com" autocomplete="username">
+      </div>
+      <div class="field">
+        <label>密码（至少 8 位）</label>
+        <input id="password" type="password" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <div class="row" style="margin-top:16px">
+        <button class="primary grow" id="btnAuth">登录</button>
+      </div>
+      <div style="margin-top:12px;text-align:center">
+        <button class="link" id="btnSwitch">没有账号？注册</button>
+      </div>
+      <div class="hint" style="margin-top:10px;text-align:center">
+        按 <span class="kbd">Enter</span> 直接提交
+      </div>
+      <div class="err hidden" id="authErr"></div>
+    </div>
+  </section>
+
+  <section id="view-home" class="hidden">
+
+    <div class="card">
+      <h2>1 · 上传简历</h2>
+      <p class="sub">支持 PDF 和 Word(.docx)。扫描件或图片读不出字，会被拒绝。</p>
+      <div class="row">
+        <div class="grow"><input id="file" type="file" accept=".pdf,.docx"></div>
+        <button class="primary" id="btnUpload">上传</button>
+      </div>
+      <div class="err hidden" id="uploadErr"></div>
+      <div class="ok-msg hidden" id="uploadOk"></div>
+    </div>
+
+    <div class="card">
+      <h2>2 · 开始面试</h2>
+      <p class="sub">岗位描述写得越具体，出的题越贴。</p>
+      <div class="field">
+        <label>选简历</label>
+        <select id="resumeSelect"></select>
+      </div>
+      <div class="field">
+        <label>岗位描述（至少 10 字）</label>
+        <textarea id="jd" placeholder="例：负责测试开发，需要接口自动化与质量体系建设经验，熟悉 Python / pytest / JMeter。"></textarea>
+      </div>
+      <div class="row" style="margin-bottom:14px">
+        <div class="grow">
+          <label>岗位方向</label>
+          <select id="role">
+            <option value="test">测试开发</option>
+            <option value="backend">后端开发</option>
+            <option value="ai">AI / 算法</option>
+          </select>
+        </div>
+        <div class="grow">
+          <label>轮次</label>
+          <select id="turns">
+            <option value="3">3 轮 · 约 10 分钟</option>
+            <option value="5" selected>5 轮 · 约 20 分钟</option>
+            <option value="8">8 轮 · 约 30 分钟</option>
+          </select>
+        </div>
+      </div>
+      <button class="primary" id="btnCreate">创建并开始</button>
+      <div class="err hidden" id="createErr"></div>
+    </div>
+
+    <div class="card hidden" id="trendCard">
+      <h2>成绩趋势</h2>
+      <p class="sub">最近几场已完成面试的总分变化</p>
+      <div class="trend-wrap" id="trendBody"></div>
+    </div>
+
+    <div class="card">
+      <h2>历史面试</h2>
+      <div id="list"><div class="empty">还没有面试</div></div>
+    </div>
+
+  </section>
+
+  <section id="view-chat" class="hidden">
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:10px">
+        <h2 style="margin:0">面试进行中</h2>
+        <span class="badge info" id="chatStatus"></span>
+        <span style="flex:1"></span>
+        <span class="hint" id="chatMeta"></span>
+      </div>
+      <div class="progress"><i id="progressBar" style="width:0%"></i></div>
+
+      <div id="chatBody"></div>
+
+      <div id="answerBox" class="hidden">
+        <div class="field" style="margin-top:4px">
+          <label>你的回答 —— 说清「怎么做的、为什么这么做、遇到什么问题」</label>
+          <textarea id="answer" placeholder="例：我用唯一索引加事务兜底，因为先查后插存在 TOCTOU 窗口……"></textarea>
+        </div>
+        <div class="row">
+          <button class="primary" id="btnAnswer">提交回答</button>
+          <button id="btnBackHome">先离开</button>
+          <span style="flex:1"></span>
+          <span class="hint"><span class="kbd">Enter</span> 提交 · <span class="kbd">Shift</span>+<span class="kbd">Enter</span> 换行</span>
+          <span class="hint" id="charCount">0 字</span>
+        </div>
+      </div>
+
+      <div id="doneBox" class="hidden" style="text-align:center;padding:16px 0 4px">
+        <p class="hint" style="margin:0 0 14px">面试已结束，可以生成报告了。</p>
+        <button class="primary" id="btnScore">生成报告</button>
+      </div>
+
+      <div class="err hidden" id="chatErr"></div>
+    </div>
+  </section>
+
+  <section id="view-report" class="hidden">
+    <div class="card" id="reportCard"></div>
+    <button id="btnReportBack">返回首页</button>
+  </section>
+
+</main>
+
+<script>
+// 单文件前端，不引 React / 构建工具：
+// 这个项目的价值在后端（状态机、判定口径、成本控制），
+// 前端只要能点通就够；省掉 node_modules 和构建步骤，双击就能跑。
+const API = '';
+let token = localStorage.getItem('ace_token') || '';
+let authMode = 'login';
+let currentInterview = null;
+
+const $ = (id) => document.getElementById(id);
+const show = (el, on) => el.classList.toggle('hidden', !on);
+
+function setErr(el, msg) {
+  if (!msg) { el.textContent = ''; show(el, false); return; }
+  el.textContent = msg;
+  show(el, true);
+}
+
+async function api(path, opts = {}) {
+  const headers = opts.headers || {};
+  if (token) headers['Authorization'] = 'Bearer ' + token;
+  // 只有字符串 body 才设 JSON；FormData 必须让浏览器自己带 multipart 边界
+  if (typeof opts.body === 'string' && !headers['Content-Type']) {
+    headers['Content-Type'] = 'application/json';
+  }
+
+  const res = await fetch(API + path, { ...opts, headers });
+  const text = await res.text();
+  let data = null;
+  if (text) { try { data = JSON.parse(text); } catch { data = { raw: text }; } }
+
+  if (!res.ok) {
+    const reason = (data && (data.reason || data.error)) || ('HTTP ' + res.status);
+
+    // 401 且本地有令牌 = 令牌失效（过期 / 账号被删 / 换了密钥）。
+    // 不清掉的话用户会卡在「界面还是登录态，但每个请求都失败」，
+    // 而且看到的是一句「上传失败」，完全不知道要重新登录。
+    if (res.status === 401 && token) {
+      forceLogout(reason);
+    }
+
+    throw new Error(reason);
+  }
+  return data;
+}
+
+// forceLogout 清本地登录态并回登录页，把原因写在登录框下面。
+function forceLogout(reason) {
+  token = '';
+  localStorage.removeItem('ace_token');
+  currentInterview = null;
+  $('who').textContent = '';
+  show($('btnLogout'), false);
+  view('auth');
+  setErr($('authErr'), reason || '登录已失效，请重新登录');
+}
+
+function view(name) {
+  ['auth', 'home', 'chat', 'report'].forEach(v => show($('view-' + v), v === name));
+}
+
+// ---------- 认证 ----------
+$('btnSwitch').onclick = () => {
+  authMode = authMode === 'login' ? 'register' : 'login';
+  const isLogin = authMode === 'login';
+  $('authTitle').textContent = isLogin ? '登录' : '注册';
+  $('btnAuth').textContent = isLogin ? '登录' : '注册';
+  $('btnSwitch').textContent = isLogin ? '没有账号？注册' : '已有账号？登录';
+  setErr($('authErr'), '');
+};
+
+$('btnAuth').onclick = async () => {
+  setErr($('authErr'), '');
+  const email = $('email').value.trim();
+  const password = $('password').value;
+  if (!email || !password) { setErr($('authErr'), '邮箱和密码都要填'); return; }
+
+  $('btnAuth').disabled = true;
+  try {
+    const data = await api('/api/auth/' + (authMode === 'login' ? 'login' : 'register'), {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
+    token = data.token;
+    localStorage.setItem('ace_token', token);
+    enterHome(data.user);
+  } catch (e) {
+    setErr($('authErr'), e.message);
+  } finally {
+    $('btnAuth').disabled = false;
+  }
+};
+
+// 回车直接提交，Shift+Enter 换行。
+// 不加这个，每答一题都要挪鼠标点按钮，长面试下来很烦。
+function bindEnter(el, action, allowShiftNewline) {
+  el.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    if (allowShiftNewline && e.shiftKey) return;   // Shift+Enter 交给浏览器换行
+    e.preventDefault();
+    action();
+  });
+}
+
+bindEnter($('email'), () => $('btnAuth').click(), false);
+bindEnter($('password'), () => $('btnAuth').click(), false);
+bindEnter($('answer'), () => $('btnAnswer').click(), true);
+// JD 是多行文本，用 Ctrl/Cmd+Enter 提交，避免写描述时误触
+$('jd').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    $('btnCreate').click();
+  }
+});
+
+$('btnLogout').onclick = () => {
+  token = '';
+  localStorage.removeItem('ace_token');
+  currentInterview = null;
+  $('who').textContent = '';
+  show($('btnLogout'), false);
+  setErr($('authErr'), '');
+  view('auth');
+};
+
+function enterHome(user) {
+  if (user && user.email) $('who').textContent = user.email;
+  show($('btnLogout'), true);
+  view('home');
+  loadResumes();
+  loadInterviews();
+  loadTrend();
+}
+
+// ---------- 简历 ----------
+async function loadResumes() {
+  try {
+    const data = await api('/api/resumes');
+    const sel = $('resumeSelect');
+    sel.innerHTML = '';
+    if (!data.items || data.items.length === 0) {
+      sel.innerHTML = '<option value="">（还没有简历，先上传一份）</option>';
+      return;
+    }
+    data.items.forEach(r => {
+      const opt = document.createElement('option');
+      opt.value = r.id;
+      opt.textContent = r.filename + (r.parse_status === 'ok' ? ' · 已结构化' : ' · 仅原文');
+      sel.appendChild(opt);
+    });
+  } catch (e) {
+    console.warn(e);
+  }
+}
+
+$('btnUpload').onclick = async () => {
+  setErr($('uploadErr'), '');
+  show($('uploadOk'), false);
+  const f = $('file').files[0];
+  if (!f) { setErr($('uploadErr'), '先选一个文件'); return; }
+
+  const fd = new FormData();
+  fd.append('file', f);
+
+  $('btnUpload').disabled = true;
+  $('btnUpload').textContent = '解析中…';
+  try {
+    const data = await api('/api/resumes', { method: 'POST', body: fd, headers: {} });
+    $('uploadOk').textContent =
+      '已上传：' + data.filename + '（' + data.chars + ' 字，' +
+      (data.parse_status === 'ok' ? '已结构化' : '仅原文') + '）' +
+      (data.duplicate ? ' —— 内容重复，复用已有记录' : '');
+    show($('uploadOk'), true);
+    loadResumes();
+  } catch (e) {
+    setErr($('uploadErr'), e.message);
+  } finally {
+    $('btnUpload').disabled = false;
+    $('btnUpload').textContent = '上传';
+  }
+};
+
+// ---------- 面试列表 ----------
+const STATUS_TEXT = {
+  created: '待开始', asking: '进行中', answering: '进行中',
+  scoring: '待评分', done: '已完成', aborted: '已放弃',
+};
+const STATUS_CLASS = {
+  created: '', asking: 'info', answering: 'info',
+  scoring: 'warn', done: 'ok', aborted: 'danger',
+};
+
+async function loadInterviews() {
+  try {
+    const data = await api('/api/interviews');
+    const box = $('list');
+    if (!data.items || data.items.length === 0) {
+      box.innerHTML = '<div class="empty">还没有面试</div>';
+      return;
+    }
+    box.innerHTML = '';
+    data.items.forEach(it => {
+      const row = document.createElement('div');
+      row.className = 'item';
+
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+      meta.innerHTML =
+        '<div class="title">面试 #' + it.id +
+        '<span class="badge ' + (STATUS_CLASS[it.status] || '') + '">' +
+        escapeHTML(STATUS_TEXT[it.status] || it.status) + '</span></div>' +
+        '<div class="sub2">' + escapeHTML(roleText(it.role_type)) + ' · ' +
+        it.current_seq + '/' + it.max_turns + ' 轮</div>';
+
+      const btn = document.createElement('button');
+      btn.textContent = it.status === 'done' ? '看报告' : '继续';
+      btn.onclick = () => openInterview(it.id, it.status);
+
+      row.appendChild(meta);
+      row.appendChild(btn);
+      box.appendChild(row);
+    });
+  } catch (e) {
+    console.warn(e);
+  }
+}
+
+// roleText 只做「代码 → 中文名」的映射，**不负责转义**。
+// 未知值原样返回，所以调用方必须包 escapeHTML —— 它最终是插进 innerHTML 的。
+function roleText(r) {
+  return { test: '测试开发', backend: '后端开发', ai: 'AI / 算法' }[r] || r;
+}
+
+$('btnCreate').onclick = async () => {
+  setErr($('createErr'), '');
+  const resumeID = $('resumeSelect').value;
+  const jd = $('jd').value.trim();
+  if (!resumeID) { setErr($('createErr'), '先上传一份简历'); return; }
+  if (jd.length < 10) { setErr($('createErr'), '岗位描述至少 10 个字'); return; }
+
+  $('btnCreate').disabled = true;
+  $('btnCreate').textContent = '创建中…';
+  try {
+    const data = await api('/api/interviews', {
+      method: 'POST',
+      body: JSON.stringify({
+        resume_id: Number(resumeID), jd_text: jd,
+        role_type: $('role').value, max_turns: Number($('turns').value),
+      }),
+    });
+    await openInterview(data.id, data.status, true);
+  } catch (e) {
+    setErr($('createErr'), e.message);
+  } finally {
+    $('btnCreate').disabled = false;
+    $('btnCreate').textContent = '创建并开始';
+  }
+};
+
+// ---------- 成绩趋势 ----------
+const DIM_COLOR = { accuracy: '#2f6feb', clarity: '#1a7f37', depth: '#9a6700' };
+
+async function loadTrend() {
+  const card = $('trendCard');
+  const box = $('trendBody');
+  try {
+    const data = await api('/api/stats/trend?limit=10');
+    const items = data.items || [];
+    if (items.length < 2) {
+      show(card, false);   // 少于两场画不出趋势，不占地方
+      return;
+    }
+    show(card, true);
+    box.innerHTML = trendSVG(items) +
+      '<div class="trend-legend">' +
+        '<span><i style="background:#1f2328"></i>总分</span>' +
+        '<span><i style="background:' + DIM_COLOR.accuracy + '"></i>准确性</span>' +
+        '<span><i style="background:' + DIM_COLOR.clarity + '"></i>清晰度</span>' +
+        '<span><i style="background:' + DIM_COLOR.depth + '"></i>深度</span>' +
+      '</div>';
+  } catch (e) {
+    show(card, false);
+    console.warn(e);
+  }
+}
+
+// trendSVG 手画折线：只用 SVG，不引图表库。
+// 三张维度线都按 0-100 换算（维度分 /5*100），和总分同尺度。
+function trendSVG(items) {
+  const W = 800, H = 120, PAD = 8;
+  const n = items.length;
+  const stepX = n > 1 ? (W - PAD * 2) / (n - 1) : 0;
+
+  const y = (v) => H - PAD - (v / 100) * (H - PAD * 2);
+  const x = (i) => PAD + i * stepX;
+
+  const dimVal = (it, dim) => {
+    const arr = it.dimensions || [];
+    const hit = arr.find(d => d.dimension === dim);
+    return hit ? (hit.score / 5) * 100 : null;
+  };
+
+  const path = (vals) => {
+    let d = '', started = false;
+    vals.forEach((v, i) => {
+      if (v == null) return;
+      d += (started ? ' L' : 'M') + x(i).toFixed(1) + ' ' + y(v).toFixed(1);
+      started = true;
+    });
+    return d;
+  };
+
+  let svg = '<svg class="trend-svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none">';
+  // 三条参考线：0 / 50 / 100
+  [0, 50, 100].forEach(v => {
+    svg += '<line x1="0" y1="' + y(v) + '" x2="' + W + '" y2="' + y(v) +
+      '" stroke="#eaeef2" stroke-width="1"/>';
+  });
+
+  ['accuracy', 'clarity', 'depth'].forEach(dim => {
+    const vals = items.map(it => dimVal(it, dim));
+    svg += '<path d="' + path(vals) + '" fill="none" stroke="' + DIM_COLOR[dim] +
+      '" stroke-width="1.5" stroke-linejoin="round" opacity="0.85"/>';
+  });
+
+  const totals = items.map(it => it.total || 0);
+  svg += '<path d="' + path(totals) + '" fill="none" stroke="#1f2328" stroke-width="2" stroke-linejoin="round"/>';
+  items.forEach((it, i) => {
+    svg += '<circle cx="' + x(i).toFixed(1) + '" cy="' + y(it.total || 0).toFixed(1) +
+      '" r="3" fill="#fff" stroke="#1f2328" stroke-width="2"/>';
+  });
+
+  svg += '</svg>';
+  return svg;
+}
+
+// ---------- 对话 ----------
+async function openInterview(id, status, autoStart) {
+  currentInterview = { id, status };
+  view('chat');
+  setErr($('chatErr'), '');
+  $('chatBody').innerHTML = '<div class="empty">加载中…</div>';
+  show($('answerBox'), false);
+  show($('doneBox'), false);
+
+  try {
+    const iv = await api('/api/interviews/' + id);
+    currentInterview = { id: iv.id, status: iv.status };
+    renderChat(iv);
+    if (autoStart && iv.status === 'created') await startInterview(null);
+  } catch (e) {
+    $('chatBody').innerHTML = '';
+    setErr($('chatErr'), e.message);
+  }
+}
+
+function renderChat(iv) {
+  const st = $('chatStatus');
+  st.textContent = STATUS_TEXT[iv.status] || iv.status;
+  st.className = 'badge ' + (STATUS_CLASS[iv.status] || '');
+  $('chatMeta').textContent = '第 ' + iv.current_seq + ' / ' + iv.max_turns + ' 轮';
+  $('progressBar').style.width = Math.min(100, (iv.current_seq / iv.max_turns) * 100) + '%';
+
+  const body = $('chatBody');
+  body.innerHTML = '';
+
+  const turns = iv.turns || [];
+  if (turns.length === 0) {
+    body.innerHTML = '<div class="empty">还没开始</div>';
+  }
+
+  turns.forEach(t => {
+    const q = document.createElement('div');
+    q.className = 'qcard';
+    const head = document.createElement('div');
+    head.className = 'qhead';
+    head.innerHTML = '<span class="badge">第 ' + t.seq + ' 题</span>' +
+      '<span class="badge">' + typeText(t.question_type) + '</span>';
+    const p = document.createElement('p');
+    p.textContent = t.question;
+    q.appendChild(head);
+    q.appendChild(p);
+    body.appendChild(q);
+
+    if (t.answered) {
+      const a = document.createElement('div');
+      a.className = 'acard';
+      const lbl = document.createElement('div');
+      lbl.className = 'alabel';
+      lbl.textContent = '你的回答';
+      const ap = document.createElement('p');
+      ap.textContent = t.answer;
+      a.appendChild(lbl);
+      a.appendChild(ap);
+      body.appendChild(a);
+    }
+  });
+
+  if (iv.status === 'created') {
+    const btn = document.createElement('button');
+    btn.className = 'primary';
+    btn.textContent = '开始面试';
+    btn.onclick = () => startInterview(btn);
+    body.appendChild(btn);
+    return;
+  }
+
+  if (iv.status === 'asking') {
+    show($('answerBox'), true);
+    $('answer').value = '';
+    updateCharCount();
+    $('answer').focus();
+  } else if (iv.status === 'scoring') {
+    show($('doneBox'), true);
+  } else if (iv.status === 'done') {
+    showReport(iv.id);
+  }
+}
+
+function typeText(t) {
+  return { tech: '技术', project: '项目深挖', behavior: '行为', followup: '追问' }[t] || t;
+}
+
+function updateCharCount() {
+  $('charCount').textContent = $('answer').value.trim().length + ' 字';
+}
+$('answer').addEventListener('input', updateCharCount);
+
+async function startInterview(btn) {
+  setErr($('chatErr'), '');
+  if (btn) { btn.disabled = true; btn.textContent = '出题中…'; }
+  try {
+    await api('/api/interviews/' + currentInterview.id + '/start', { method: 'POST' });
+    await openInterview(currentInterview.id, 'asking');
+  } catch (e) {
+    setErr($('chatErr'), e.message);
+    if (btn) { btn.disabled = false; btn.textContent = '开始面试'; }
+  }
+}
+
+$('btnAnswer').onclick = async () => {
+  setErr($('chatErr'), '');
+  const answer = $('answer').value.trim();
+  if (answer.length < 2) { setErr($('chatErr'), '回答太短了，再写两句'); return; }
+
+  $('btnAnswer').disabled = true;
+  $('btnAnswer').textContent = '出下一题…';
+  try {
+    const data = await api('/api/interviews/' + currentInterview.id + '/answer', {
+      method: 'POST',
+      body: JSON.stringify({ answer }),
+    });
+    await openInterview(currentInterview.id, data.finished ? 'scoring' : 'asking');
+  } catch (e) {
+    setErr($('chatErr'), e.message);
+  } finally {
+    $('btnAnswer').disabled = false;
+    $('btnAnswer').textContent = '提交回答';
+  }
+};
+
+$('btnBackHome').onclick = () => { view('home'); loadInterviews(); };
+
+$('btnScore').onclick = async () => {
+  setErr($('chatErr'), '');
+  $('btnScore').disabled = true;
+  $('btnScore').textContent = '评分中…（约 10 秒）';
+  try {
+    await api('/api/interviews/' + currentInterview.id + '/score', { method: 'POST' });
+    await showReport(currentInterview.id);
+  } catch (e) {
+    setErr($('chatErr'), e.message);
+  } finally {
+    $('btnScore').disabled = false;
+    $('btnScore').textContent = '生成报告';
+  }
+};
+
+// ---------- 报告 ----------
+const DIM_TEXT = { accuracy: '准确性', clarity: '清晰度', depth: '深度' };
+const LEVEL_CLASS = { '优秀': 'ok', '良好': 'ok', '一般': 'warn', '待提升': 'warn' };
+
+async function showReport(id) {
+  view('report');
+  const card = $('reportCard');
+  card.innerHTML = '<div class="empty">加载中…</div>';
+
+  try {
+    const iv = await api('/api/interviews/' + id);
+    if (!iv.report) { card.innerHTML = '<div class="empty">还没有报告</div>'; return; }
+    const r = typeof iv.report === 'string' ? JSON.parse(iv.report) : iv.report;
+
+    card.innerHTML =
+      '<div class="hero">' +
+        '<div><div class="num">' + r.total + '<small> / 100</small></div></div>' +
+        '<div class="desc">' +
+          '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">' +
+            '<span class="badge ' + (LEVEL_CLASS[r.level] || '') + '">' + escapeHTML(r.level) + '</span>' +
+            '<span style="font-size:13px;font-weight:600">面试结果</span>' +
+          '</div>' +
+          '<div class="hint">' + escapeHTML(roleText(iv.role_type)) + ' · 共 ' + (iv.turns || []).length +
+            ' 轮 · 总分 = 三维度平均分 ÷ 5 × 100</div>' +
+          '<div class="samples" style="margin-top:6px">' + sampleNote(r) + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<h2 style="font-size:14px;font-weight:600;margin:0 0 14px">三个维度</h2>' +
+      r.dimensions.map(d =>
+        '<div class="dim">' +
+          '<div class="dtop"><span class="dname">' + escapeHTML(DIM_TEXT[d.dimension] || d.dimension) + '</span>' +
+          '<span class="dval">' + d.score + ' / 5</span></div>' +
+          '<div class="bar"><i style="width:' + (d.score / 5 * 100) + '%"></i></div>' +
+          '<div class="dcomment">' + escapeHTML(d.comment) + '</div>' +
+        '</div>'
+      ).join('') +
+      '<div class="cols" style="margin-top:22px">' +
+        col('做得好的', r.strengths, 'ok') +
+        col('需要补的', r.weaknesses, 'warn') +
+        col('改进建议', r.suggestions, 'info') +
+      '</div>';
+  } catch (e) {
+    card.innerHTML = '<div class="empty">' + escapeHTML(e.message) + '</div>';
+  }
+}
+
+// sampleNote 说明这个分数是怎么来的：采样几次、稳不稳。
+// 不稳的时候必须明说，否则用户会把一个飘的分当成真实水平。
+function sampleNote(r) {
+  const n = r.sample_count || 1;
+  const failed = r.sample_failed || 0;
+  const failNote = failed > 0
+    ? '<span class="badge danger">' + failed + ' 次采样失败</span>'
+    : '';
+
+  if (n <= 1) {
+    return '<span class="badge">单次采样</span>' + failNote;
+  }
+  if (r.consistent) {
+    return '<span class="badge ok">' + n + ' 次采样</span>' + failNote +
+      '<span>三个维度分差都在 1 分内，结果稳定</span>';
+  }
+  const names = escapeHTML((r.unstable_dims || []).map(d => DIM_TEXT[d] || d).join('、'));
+  return '<span class="badge warn">' + n + ' 次采样</span>' + failNote +
+    '<span>' + names + ' 波动较大（分差 &gt; 1），这一项分数仅供参考</span>';
+}
+
+function col(title, items, cls) {
+  const list = (items || []).map(s => '<li>' + escapeHTML(s) + '</li>').join('') ||
+    '<li style="color:#8b949e">（无）</li>';
+  return '<div class="col"><h3><span class="badge ' + cls + '">' + title + '</span></h3><ul>' + list + '</ul></div>';
+}
+
+function escapeHTML(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+$('btnReportBack').onclick = () => { view('home'); loadInterviews(); loadTrend(); };
+
+// ---------- 启动 ----------
+(async function boot() {
+  if (!token) { view('auth'); return; }
+  try {
+    await api('/api/resumes');   // 顺便验一下 token 还有效
+    enterHome(null);
+  } catch {
+    token = '';
+    localStorage.removeItem('ace_token');
+    view('auth');
+  }
+})();
+</script>
+</body>
+</html>
