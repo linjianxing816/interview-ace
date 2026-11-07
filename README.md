@@ -1,8 +1,7 @@
 # InterviewAce · AI 模拟面试平台（Go）
 
-> 状态：**核心闭环已完成**（2026-11-02 ~ 11-04，3 天）——注册 → 传简历 → 开面试 → 追问 → 评分 → 报告 → 趋势，346 个测试全绿（含 43 个真库）
-> 完整方案：`../00-前置文档/项目二-方案.md`
-> 数据库：`mock_interview`（本机 PostgreSQL 16，`127.0.0.1:5432`）
+> 状态：**核心闭环已完成**（2026-11-02 ~ 11-04）——注册 → 传简历 → 开面试 → 追问 → 评分 → 报告 → 趋势，346 个测试全绿（含 43 个真库）
+> 数据库：PostgreSQL 16
 
 求职者上传简历 + 目标岗位 JD → AI 扮演面试官多轮追问 → 出评分和复盘。
 
@@ -11,8 +10,8 @@
 ## 怎么跑
 
 ```bash
-# 1. 配置（.env 已在本地，含密钥，不进 git）
-cp .env.example .env     # 首次；已有 .env 就跳过
+# 1. 配置
+cp .env.example .env     # 首次
 
 # 2. 跑测试
 go test ./...
@@ -22,7 +21,7 @@ go build -o bin/ace.exe ./cmd/server
 ./bin/ace.exe -env .env
 ```
 
-**默认端口 8090**（8080 被本机另一个程序 `ApplicationWebServer` 占用）。
+**默认端口 8090**。
 
 ```bash
 curl http://127.0.0.1:8090/healthz
@@ -61,19 +60,14 @@ LLM_SMOKE=1 go test ./internal/llm -run TestChat_真实接口冒烟 -v
 
 ## 数据库
 
-**本机 PG 的坑**：沙箱在每次工具调用结束时杀掉整个进程树，`postgres.exe` 活不过调用边界。
-`sc.exe` / `schtasks.exe` 都在黑名单、当前 shell 也不是管理员，所以注册服务这条路走不通。
+本地开发用 PostgreSQL 16。跑集成测试前先起库，并把 `TEST_DB_DSN` 指向一个可用的实例：
 
-用 `E:\PostgreSQL\with-pg.ps1` 代替：一次调用内启动 → 跑命令 → 干净关停。
-
-```powershell
-# 跑数据库集成测试
-& 'E:\PostgreSQL\with-pg.ps1' -Command @'
-Set-Location 'C:\Users\14814\Desktop\求职项目工作空间\03-InterviewAce-Go'
-$env:TEST_DB_DSN = 'postgres://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disable'
+```bash
+export TEST_DB_DSN='postgres://<user>:<pass>@127.0.0.1:5432/postgres?sslmode=disable'
 go test ./internal/db -v
-'@
 ```
+
+每个用例建独立临时库、跑迁移、用完删掉，不污染主库；没设 `TEST_DB_DSN` 时集成测试自动 skip。
 
 迁移设计：
 
@@ -323,7 +317,7 @@ created --start--> asking --submit_answer--> answering --next_question--> asking
 
 ```bash
 go test ./...                                                  # 303 个，不需要数据库
-TEST_DB_DSN='postgres://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disable' \
+TEST_DB_DSN='postgres://<user>:<pass>@127.0.0.1:5432/postgres?sslmode=disable' \
   go test ./...                                                # 346 个，含 43 个真库测试
 ```
 
@@ -360,7 +354,7 @@ TEST_DB_DSN='postgres://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disabl
 
 ```
 后端    Go 1.27 / Gin v1.12
-数据库  PostgreSQL 16（本机 E:\PostgreSQL，127.0.0.1:5432）
+数据库  PostgreSQL 16
 驱动    pgx v5（不用 GORM）
 前端    React 19 + Vite + Tailwind
 LLM     OpenAI-compatible API
